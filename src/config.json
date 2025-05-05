@@ -1,0 +1,18 @@
+{
+  "UDP_RECEIVER_IP": "10.67.18.14", 
+  "UDP_PORT": 3000,
+  "WS_SERVER_IP": "10.67.18.71",
+  "WS_SERVER_PORT": 15015,
+  "TOTAL_ESPDU_TO_BE_SENT": 18000,
+  "INTERVAL_BETWEEN_ESPDU_IN_MS": 1,
+  "TERMINATION_CHECK_INTERVAL_MS": 2000,
+  "APPLICATION_SAVING_INTERVAL_MS": 30000,
+  "TOTAL_OF_EXPERIMENTS": 30,
+  "DELAY_BETWEEN_EXPERIMENTS_MS": 3000,
+  "DIS_MESSAGES_DIR": "src/data/dis/messages",
+  "DIS_SENDER_METRICS_DIR": "src/data/dis/sender",
+  "DIS_RECEIVER_METRICS_DIR": "src/data/dis/receiver",
+  "PROTO_MESSAGES_DIR": "src/data/proto/messages",
+  "PROTO_SENDER_METRICS_DIR": "src/data/proto/sender",
+  "PROTO_RECEIVER_METRICS_DIR": "src/data/proto/receiver"
+}

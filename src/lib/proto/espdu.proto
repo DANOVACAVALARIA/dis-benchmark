@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package dis;
+
+enum ProtocolVersion {
+  OTHER = 0;
+  IEEE_1278_1_1995 = 5;
+}
+
+enum PduType {
+  OTHER = 0;
+  ENTITY_STATE = 1;
+  FIRE = 2;
+  DETONATION = 3;
+  COLLISION = 4;
+}
+
+enum ProtocolFamily {
+  OTHER = 0;
+  ENTITY_INFORMATION = 1;
+}
+
+enum ForceId {
+  OTHER = 0;
+  FRIENDLY = 1;
+  OPPOSING = 2;
+}
+
+enum CharacterSet {
+  UNUSED = 0;
+  ASCII = 1;
+}
+
+message EntityID {
+  uint32 siteID = 1;
+  uint32 applicationID = 2;
+  uint32 entityID = 3;
+}
+
+message EntityType {
+  uint32 entityKind = 1;
+  uint32 domain = 2;
+  uint32 country = 3;
+  uint32 category = 4;
+  uint32 subcategory = 5;
+  uint32 specific = 6;
+  uint32 extra = 7;
+}
+
+message Vector3Int {        // microdegrees for location, cm/sec for velocity, cm/sec^2 for acceleration 
+  int32 x = 1;
+  int32 y = 2;
+  int32 z = 3;
+}
+
+message Orientation {       // microradians
+  int32 psi = 1;
+  int32 theta = 2;
+  int32 phi = 3;
+}
+
+message DeadReckoningParameter {
+  uint32 algorithm = 1;
+  bytes otherParameters = 2;          // 15 bytes
+  Vector3Int linearAcceleration = 3;  // cm/sec^2
+  Vector3Int angularVelocity = 4;     // microradians/sec
+}
+
+message Marking {
+  CharacterSet characterSet = 1;
+  bytes characters = 2; // 11 bytes
+}
+
+// message ArticulationParameter {
+//   uint32 parameterTypeDesignator = 1;
+//   uint32 changeIndicator = 2;
+//   uint32 articulationAttachmentID = 3;
+//   uint32 parameterType = 4;
+//   float parameterValue = 5;
+// }
+
+message EntityStatePdu {
+  ProtocolVersion protocolVersion = 1;
+  uint32 exerciseID = 2;
+  PduType pduType = 3;
+  ProtocolFamily protocolFamily = 4;
+  uint32 timestamp = 5;
+  uint32 pduLength = 6;
+  uint32 padding = 7;
+
+  EntityID entityID = 8;
+  ForceId forceId = 9;
+  uint32 numberOfArticulationParameters = 10;
+
+  EntityType entityType = 11;
+  EntityType alternativeEntityType = 12;
+  Vector3Int entityLinearVelocity = 13; // cm/sec
+  Vector3Int entityLocation = 14;       // microdegrees
+  Orientation entityOrientation = 15;   // microradians
+
+  uint32 entityAppearance = 16;
+  DeadReckoningParameter deadReckoningParameters = 17;
+  Marking marking = 18;
+  uint32 capabilities = 19;
+
+  repeated bytes articulationParameters = 20;
+}

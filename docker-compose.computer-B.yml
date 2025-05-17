@@ -1,0 +1,20 @@
+services:
+  sender:
+    container_name: sender-app
+    build:
+      context: .
+      network: host
+    env_file:
+      - .env
+    command: node src/$SENDER_SCRIPT
+    # networks:
+    #   - experiment-net
+    ports:
+      - $WS_SERVER_PORT:$WS_SERVER_PORT
+    volumes:
+      - ./notebook/data:/app/src/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G

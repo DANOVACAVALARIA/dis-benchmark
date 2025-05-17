@@ -1,18 +1,17 @@
 import dis from 'open-dis'
 import { timestampToDis } from '../utils/DISTimestamp.js' 
 
-
 // instantiate message
 const entityStatePDU = new dis.EntityStatePdu()
 
 
-export const ESPDU = () => {
+export const ESPDU = (rng) => {
 
   entityStatePDU.pduLength = 1280
 
   entityStatePDU.entityID.site = 2
   entityStatePDU.entityID.application = 1
-  entityStatePDU.entityID.entity = Math.ceil(Math.random() * 4)
+  entityStatePDU.entityID.entity = Math.ceil(rng() * 4)
   
   entityStatePDU.forceId = 1
 
@@ -28,8 +27,8 @@ export const ESPDU = () => {
 
   entityStatePDU.timestamp = timestampToDis()
 
-  entityStatePDU.entityLocation.x = (-30001142 + (Math.random() < 0.5 ? -1 : 1))
-  entityStatePDU.entityLocation.y = (-55016077 + (Math.random() < 0.5 ? -1 : 1))
+  entityStatePDU.entityLocation.x = (-30001142 + (rng() < 0.5 ? -1 : 1))
+  entityStatePDU.entityLocation.y = (-55016077 + (rng() < 0.5 ? -1 : 1))
 
   entityStatePDU.entityLocation.z = 0
   

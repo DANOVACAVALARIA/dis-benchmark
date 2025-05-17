@@ -1,0 +1,7 @@
+include:
+  - path: 'docker-compose.computer-A.yml'
+  # - path: 'docker-compose.computer-B.yml'
+
+# networks:
+#   experiment-net:
+#     driver: bridge

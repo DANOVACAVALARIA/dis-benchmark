@@ -1,6 +1,8 @@
 import dgram from 'dgram'
 import fs from 'fs'
 
+import seedrandom from 'seedrandom'
+
 import { encodeESPDU } from './lib/encodeESPDU.js'
 import { generateMessages } from './lib/generateMessages.js'
 import { saveCsvFile } from './lib/saveCsvFile.js'
@@ -8,6 +10,16 @@ import { saveCsvFile } from './lib/saveCsvFile.js'
 
 // load config
 import config from './config.json' with { type: 'json' }
+
+// set env variables
+const DIS_SENDER_METRICS_DIR = process.env.DIS_SENDER_METRICS_DIR || config.DIS_SENDER_METRICS_DIR
+const UDP_RECEIVER_IP = process.env.UDP_RECEIVER_IP || config.UDP_RECEIVER_IP
+const UDP_PORT = process.env.UDP_PORT || config.UDP_PORT
+const TOTAL_ESPDU_TO_BE_SENT = process.env.TOTAL_ESPDU_TO_BE_SENT || config.TOTAL_ESPDU_TO_BE_SENT
+const TERMINATION_CHECK_INTERVAL_MS = process.env.TERMINATION_CHECK_INTERVAL_MS || config.TERMINATION_CHECK_INTERVAL_MS
+const APPLICATION_SAVING_INTERVAL_MS = process.env.APPLICATION_SAVING_INTERVAL_MS || config.APPLICATION_SAVING_INTERVAL_MS
+const INTERVAL_BETWEEN_ESPDU_IN_MS = process.env.INTERVAL_BETWEEN_ESPDU_IN_MS || config.INTERVAL_BETWEEN_ESPDU_IN_MS
+const SEED = process.env.SEED || config.SEED
 
 // getting execution number
 const execArg = process.argv.find(arg => arg.startsWith('--exec='))
@@ -18,17 +30,20 @@ const client = dgram.createSocket('udp4')
 
 // metrics (DIS)
 let packetCount = 0
-const metricsFile = fs.createWriteStream(`${config.DIS_SENDER_METRICS_DIR}/dis-sender-metrics-${execNum}.csv`)
+const metricsFile = fs.createWriteStream(`${DIS_SENDER_METRICS_DIR}/dis-sender-metrics-${execNum}.csv`)
 metricsFile.write('PacketCount,Sent_Time,Encoding_Time,Size_In_Bytes,Msg_Rate\n')
 let metrics = []
 
+// create seed
+const rng = seedrandom(process.env.SEED || config.SEED)
+
 // PDU msg sent to server
 const sendESPDU = async () => {
-  const pduData = await encodeESPDU()
+  const pduData = await encodeESPDU(rng)
   
   packetCount++
   metrics.push(`${packetCount},${pduData.sentTime},${pduData.encodingTime.toFixed(4)},${pduData.encodedPdu.length},${(packetCount / (pduData.sentTime/1000)).toFixed(2)}`)
-  client.send(pduData.encodedPdu, 0, pduData.encodedPdu.length, config.UDP_PORT, config.UDP_RECEIVER_IP, (err, bytes) => {
+  client.send(pduData.encodedPdu, 0, pduData.encodedPdu.length, UDP_PORT, UDP_RECEIVER_IP, (err, bytes) => {
     
     // if (err) {
     //   console.error('Error on sending ESPU with description ', err)
@@ -38,7 +53,7 @@ const sendESPDU = async () => {
   })
 
   // ---termination check
-  if (packetCount == config.TOTAL_ESPDU_TO_BE_SENT) {
+  if (packetCount == TOTAL_ESPDU_TO_BE_SENT) {
     clearInterval(saveMetrics)
     setTimeout(async() => {
       if(await saveCsvFile(metricsFile, metrics)) {
@@ -49,7 +64,7 @@ const sendESPDU = async () => {
           process.exit(0)
         })
       }
-    }, config.TERMINATION_CHECK_INTERVAL_MS)    
+    }, TERMINATION_CHECK_INTERVAL_MS)    
   }  
 }
 
@@ -58,10 +73,10 @@ const saveMetrics = setInterval(async () => {
   if (await saveCsvFile(metricsFile, metrics)) {
     metrics = []
   }
-}, config.APPLICATION_SAVING_INTERVAL_MS)
+}, APPLICATION_SAVING_INTERVAL_MS)
 
 
 // ---start PDU generation
-generateMessages(config.TOTAL_ESPDU_TO_BE_SENT,
-                config.INTERVAL_BETWEEN_ESPDU_IN_MS,
+generateMessages(TOTAL_ESPDU_TO_BE_SENT,
+                INTERVAL_BETWEEN_ESPDU_IN_MS,
                 sendESPDU)

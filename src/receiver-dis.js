@@ -8,6 +8,14 @@ import { saveCsvFile } from './lib/saveCsvFile.js'
 // load config
 import config from './config.json' with { type: 'json' }
 
+// set env variables
+const DIS_RECEIVER_METRICS_DIR = process.env.DIS_RECEIVER_METRICS_DIR || config.DIS_RECEIVER_METRICS_DIR
+const DIS_MESSAGES_DIR = process.env.DIS_MESSAGES_DIR || config.DIS_MESSAGES_DIR
+const UDP_RECEIVER_IP = process.env.UDP_RECEIVER_IP || config.UDP_RECEIVER_IP
+const UDP_PORT = process.env.UDP_PORT || config.UDP_PORT
+const APPLICATION_SAVING_INTERVAL_MS = process.env.APPLICATION_SAVING_INTERVAL_MS || config.APPLICATION_SAVING_INTERVAL_MS
+const TERMINATION_CHECK_INTERVAL_MS = process.env.TERMINATION_CHECK_INTERVAL_MS || config.TERMINATION_CHECK_INTERVAL_MS
+
 // getting execution number
 const execArg = process.argv.find(arg => arg.startsWith('--exec='))
 const execNum = execArg ? parseInt(execArg.split('=')[1]) : 0
@@ -17,18 +25,18 @@ const server = dgram.createSocket('udp4')
 let msgCount = 0
 
 // metrics (DIS)
-const metricsFile = fs.createWriteStream(`${config.DIS_RECEIVER_METRICS_DIR}/dis-receiver-metrics-${execNum}.csv`)
+const metricsFile = fs.createWriteStream(`${DIS_RECEIVER_METRICS_DIR}/dis-receiver-metrics-${execNum}.csv`)
 metricsFile.write('Msg_Received,Received_Time,Decoding_Time\n')
 let metrics = []
 
 // message data (DIS)
-const messagesFile = fs.createWriteStream(`${config.DIS_MESSAGES_DIR}/dis-received-msg-${execNum}.csv`)
+const messagesFile = fs.createWriteStream(`${DIS_MESSAGES_DIR}/dis-received-msg-${execNum}.csv`)
 messagesFile.write('Force,ID,Kind,Domain,Country,Category,Timestamp,Location_X,Location_Y,Location_Z\n')
 let messages = []
 
 // server functions
 server.on('listening', () => {
-  console.log(`[DIS-RECEIVER] => server listening at ${config.UDP_RECEIVER_IP}:${config.UDP_PORT}...`)
+  console.log(`[DIS-RECEIVER] => server listening at ${UDP_RECEIVER_IP}:${UDP_PORT}...`)
 })
 
 server.on('message', async (msg, rinfo) => {
@@ -39,7 +47,7 @@ server.on('message', async (msg, rinfo) => {
   metrics.push(`${msgCount},${pduData.receivedTime},${pduData.decodingTime.toFixed(4)}`)
   
   // show request
-  //console.log(`[DIS-RECEIVER]: message received from ${rinfo.address}:${rinfo.port} with ${msg.length} bytes. Decoding Time: ${pduData.decodingTime}. Messages received so far: ${msgCount}.`)
+  // console.log(`[DIS-RECEIVER]: message received from ${rinfo.address}:${rinfo.port} with ${msg.length} bytes. Decoding Time: ${pduData.decodingTime}. Messages received so far: ${msgCount}.`)
 
   // save message
   messages.push([
@@ -76,7 +84,7 @@ const saveMetrics = setInterval(async () => {
     metrics = []
     messages = []
   }
-}, config.APPLICATION_SAVING_INTERVAL_MS)
+}, APPLICATION_SAVING_INTERVAL_MS)
 
 // ---stop server
 const stopServer = async () => {
@@ -94,9 +102,9 @@ const stopServer = async () => {
         process.exit(0)
       })
     }
-  }, config.TERMINATION_CHECK_INTERVAL_MS)  
+  }, TERMINATION_CHECK_INTERVAL_MS)  
 }
 
 
 // ---start server
-server.bind(config.UDP_PORT, config.UDP_RECEIVER_IP)
+server.bind(UDP_PORT, UDP_RECEIVER_IP)

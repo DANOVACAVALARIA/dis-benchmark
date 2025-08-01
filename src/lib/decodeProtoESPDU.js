@@ -1,14 +1,9 @@
 import { performance } from 'perf_hooks'
-
-import protobuf from 'protobufjs'
-
-// load protubuf data
-const root = await protobuf.load('src/lib/proto/espdu.proto')
-const EntityStatePduProto = root.lookupType('dis.EntityStatePdu')
+import { dis } from './proto/generated/espdu_pb.js'
 
 export const decodeProtoESPDU = async (msg) => {
   const startTime = performance.now()
-  const decodedPdu = EntityStatePduProto.decode(msg)
+  const decodedPdu = dis.EntityStatePdu.decode(msg)
   const decodingTime = performance.now() - startTime
   const receivedTime = performance.now()
 

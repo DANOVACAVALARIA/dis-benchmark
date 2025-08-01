@@ -3,18 +3,15 @@ services:
     container_name: orchestrator-app
     build:
       context: .
-      network: host
     env_file:
       - .env
-    command: node src/$ORCHESTRATOR_SCRIPT
+    command: node src/${ORCHESTRATOR_SCRIPT}
     # networks:
     #   - experiment-net
     ports:
-      - $UDP_PORT:$UDP_PORT/udp
+      - "${UDP_PORT}:${UDP_PORT}/udp"
+    network_mode: host
     volumes:
       - ./notebook/data:/app/src/data
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
+    cpus: '2.0'
+    mem_limit: 2g

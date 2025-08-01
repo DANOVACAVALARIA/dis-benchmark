@@ -3,12 +3,12 @@ syntax = "proto3";
 package dis;
 
 enum ProtocolVersion {
-  OTHER = 0;
+  PROTOCOL_VERSION_OTHER = 0;
   IEEE_1278_1_1995 = 5;
 }
 
 enum PduType {
-  OTHER = 0;
+  PDU_TYPE_OTHER = 0;
   ENTITY_STATE = 1;
   FIRE = 2;
   DETONATION = 3;
@@ -16,12 +16,12 @@ enum PduType {
 }
 
 enum ProtocolFamily {
-  OTHER = 0;
+  PROTOCOL_FAMILY_OTHER = 0;
   ENTITY_INFORMATION = 1;
 }
 
 enum ForceId {
-  OTHER = 0;
+  FORCE_ID_OTHER = 0;
   FRIENDLY = 1;
   OPPOSING = 2;
 }
